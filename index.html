@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Snake Game</h1>
+        <div id="score-display">Score: 0</div>
+        <div id="current-difficulty">Độ khó hiện tại: Dễ</div>
+        <div id="immortal-status"></div>
+        <canvas id="game-container" width="400" height="400"></canvas>
+        <div class="buttons">
+            <button onclick="newGame()">New Game</button>
+            <button onclick="pauseGame()">Pause</button>
+            <button onclick="resumeGame()">Resume</button>
+            <button onclick="toggleImmortal()">Bất Tử</button>        </div>
+        <div class="difficulty">
+            <p>Chọn độ khó</p>
+            <button onclick="changeSpeed(150)">Dễ</button>
+            <button onclick="changeSpeed(100)">Vừa</button>
+            <button onclick="changeSpeed(60)">Khó</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
