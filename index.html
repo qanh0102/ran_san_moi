@@ -5,6 +5,12 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+    <div class="buttons-move">
+        <button id="btnUp">↑</button>
+        <button id="btnDown">↓</button>
+        <button id="btnLeft">←</button>
+        <button id="btnRight">→</button>
+    </div>
     <div class="container">
         <h1>Snake Game</h1>
         <div id="score-display">Score: 0</div>
@@ -15,7 +21,8 @@
             <button onclick="newGame()">New Game</button>
             <button onclick="pauseGame()">Pause</button>
             <button onclick="resumeGame()">Resume</button>
-            <button onclick="toggleImmortal()">Bất Tử</button>        </div>
+            <button onclick="toggleImmortal()">Bất Tử</button>
+        </div>
         <div class="difficulty">
             <p>Chọn độ khó</p>
             <button onclick="changeSpeed(150)">Dễ</button>
