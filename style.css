@@ -1,282 +1,115 @@
-const canvasEl = document.getElementById('game-container');
-const ctx = canvasEl.getContext('2d');
-
-const spriteSheet = new Image();
-spriteSheet.src = 'hehe.png';
-
-// Tạo hình ảnh rắn
-const snakeIcon = new Image();
-snakeIcon.src = 'hehe.png';
-
-//lấy tham chiếu các nút
-const btnUp = document.getElementById('btnUp');
-const btnDown = document.getElementById('btnDown');
-const btnLeft = document.getElementById('btnLeft');
-const btnRight = document.getElementById('btnRight');
-
-// kiểm tra hình ảnh tải xong chưa
-spriteSheet.onload = function() {
-    drawBackground();
-};
-
-// Vẽ nền
-function drawBackground() {
-    ctx.drawImage(spriteSheet, 0, 0, 400, 400, 0, 0, 400, 400);
+/* Thiết lập cho phần thân của trang */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
 
-// vị trí và kích thước hình ảnh rắn
-const spriteX = 79;
-const spriteY = 827;
-const spriteWidth = 10;
-const spriteHeight = 8;
-
-let snake = [{ x: 200, y: 200 }];// vị trí ban đầu
-let food = { x: 100, y: 100 };
-let dx = 0;// tọa độ
-let dy = 0;
-let gamePaused = false;
-let score = 0;
-let lastTimeUpdate = 0;
-let gameSpeed = 200;
-
-// Hàm thay đổi tốc độ trò chơi dựa trên độ khó
-let gameDifficulty = 150;
-function changeSpeed(difficulty) {
-    gameDifficulty = difficulty;
-    clearInterval(gameInterval); // dừng hàm lặp
-    gameInterval = setInterval(gameLoop, gameDifficulty);
-    document.getElementById('current-difficulty').innerText = 'Độ khó hiện tại: ' + getDifficultyString(difficulty);
+canvas {
+    border: 1px solid #000;
 }
 
-// mô tả độ khó
-function getDifficultyString(difficulty) {
-    if (difficulty === 150) {
-        return 'Dễ';
-    } else if (difficulty === 100) {
-        return 'Vừa';
-    } else if (difficulty === 60) {
-        return 'Khó';
-    } else {
-        return 'Không xác định';
-    }
+/* Thiết lập cho phần container chứa nội dung trung tâm */
+.container {
+    text-align: center;
 }
 
-let gameInterval = setInterval(gameLoop, gameDifficulty);
-
-// Xóa màn hình
-function clearScreen() {
-    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+/* Thiết lập cho tiêu đề h1 */
+h1 {
+    margin-bottom: 20px;
 }
 
-// Vẽ rắn
-function drawSnake() {
-    for (let i = 0; i < snake.length; i++) {
-        let currentSpriteX = spriteX;
-        let currentSpriteY = spriteY;
-
-        if (i === 0) {
-            if (dx < 0) {
-                ctx.save();
-                ctx.scale(-1, 1);
-                if (dx < 0) {
-                    ctx.drawImage(spriteSheet, spriteX, spriteY, spriteWidth, spriteHeight, -snake[i].x - 20, snake[i].y, 20, 20);
-                }
-                ctx.restore();
-            } else {
-                ctx.drawImage(spriteSheet, currentSpriteX, currentSpriteY, spriteWidth, spriteHeight, snake[i].x, snake[i].y, 20, 20);
-            }
-        } else {
-            if (dx < 0) {
-                ctx.save();
-                ctx.scale(-1, 1);
-                if (dx < 0) {
-                    ctx.drawImage(spriteSheet, spriteX, spriteY, spriteWidth, spriteHeight, -snake[i].x - 20, snake[i].y, 20, 20);
-                }
-                ctx.restore();
-            } else {
-                ctx.drawImage(spriteSheet, currentSpriteX, currentSpriteY, spriteWidth, spriteHeight, snake[i].x, snake[i].y, 20, 20);
-            }
-        }
-    }
+/* Thiết lập cho hiển thị điểm số */
+#score-display {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
-// Di chuyển rắn
-function moveSnake() {
-    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-    snake.unshift(head);
-    if (snake[0].x === food.x && snake[0].y === food.y) {
-        score += 10;
-        document.getElementById('score-display').innerText = 'Score: ' + score;
-        generateFood();
-
-        // Thêm icon rắn mới vào đuôi
-        const tail = { x: snake[snake.length - 0].x, y: snake[snake.length - 0].y };
-        snake.push(tail);
-        for (let i = 1; i < snake.length; i++) {
-            let currentSegment = snake[i];
-            if (dx < 0) {
-                ctx.save();
-                ctx.scale(-1, 1);
-                ctx.drawImage(spriteSheet, spriteX, spriteY, spriteWidth, spriteHeight, -currentSegment.x - 20, currentSegment.y, 20, 20);
-                ctx.restore();
-            } else {
-                ctx.drawImage(spriteSheet, spriteX, spriteY, spriteWidth, spriteHeight, currentSegment.x, currentSegment.y, 20, 20);
-            }
-        }
-    } else {
-        snake.pop();
-    }
+/* Thiết lập cho phần container trò chơi */
+#game-container {
+    border: 10px solid #ddd;
 }
 
-// Vẽ mồi
-function drawFood() {
-    ctx.fillStyle = 'red';
-    ctx.beginPath();
-    ctx.arc(food.x + 10, food.y + 10, 10, 0, 2 * Math.PI);
-    ctx.fill();
+/* Thiết lập cho hiển thị độ khó hiện tại */
+#current-difficulty {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 18px;
 }
 
-
-// Bắt đầu trò chơi mới
-function newGame() {
-    snake = [{ x: 200, y: 200 }];
-    food = { x: 100, y: 100 };
-    dx = 0;
-    dy = 0;
-    score = 0;
-    gamePaused = false;
+/* Thiết lập cho phần nút điều khiển */
+.buttons {
+    margin-top: 20px;
 }
 
-// Tạm dừng trò chơi
-function pauseGame() {
-    gamePaused = true;
+.buttons button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50; /* Màu nền của nút */
+    color: #fff; /* Màu chữ trắng */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-// Tiếp tục trò chơi
-function resumeGame() {
-    gamePaused = false;
+.buttons button:hover {
+    background-color: #45a049; /* Màu nền khi rê chuột qua nút */
 }
 
-// màn hình kết thúc trò chơi
-function drawGameOverScreen() {
-    ctx.font = "30px Arial";
-    ctx.fillStyle = "red";
-    ctx.fillText("Game Over", canvasEl.width / 2 - 80, canvasEl.height / 2);
-    ctx.fillText("Score: " + score, canvasEl.width / 2 - 80, canvasEl.height / 2 + 40);
+/* Thiết lập cho phần độ khó */
+.difficulty {
+    margin-top: 20px;
 }
 
-// Tạo mồi mới
-function generateFood() {
-    const x = Math.floor(Math.random() * (canvasEl.width / 20)) * 20;
-    const y = Math.floor(Math.random() * (canvasEl.height / 20)) * 20;
-    food = { x: x, y: y };
+.difficulty p {
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
-// Vòng lặp trò chơi
-function gameLoop() {
-    if (!gamePaused) {
-        clearScreen();
-        drawBackground();
-        drawSnake();
-        drawFood();
-        moveSnake();
-        if (checkCollision()) { //ktra va chạm
-            pauseGame();// va chạm thì dừng trò chơi
-        }
-    }
+.difficulty button {
+    margin: 0 10px;
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #008CBA; /* Màu nền của nút */
+    color: #fff; /* Màu chữ trắng */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-// điều khiến bằng bàn phím
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowUp' && dy !== 20) {
-        dx = 0;
-        dy = -20;
-    } else if (e.key === 'ArrowDown' && dy !== -20) {
-        dx = 0;
-        dy = 20;
-    } else if (e.key === 'ArrowLeft' && dx !== 20) {
-        dx = -20;
-        dy = 0;
-    } else if (e.key === 'ArrowRight' && dx !== -20) {
-        dx = 20;
-        dy = 0;
-    }
-});
-
-//Điều khiển trực tiếp
-btnUp.addEventListener('click', function() {
-    if (dy !== 20) {
-        dx = 0;
-        dy = -20;
-    }
-});
-
-btnDown.addEventListener('click', function() {
-    if (dy !== -20) {
-        dx = 0;
-        dy = 20;
-    }
-});
-
-btnLeft.addEventListener('click', function() {
-    if (dx !== 20) {
-        dx = -20;
-        dy = 0;
-    }
-});
-
-btnRight.addEventListener('click', function() {
-    if (dx !== -20) {
-        dx = 20;
-        dy = 0;
-    }
-});
-
-// Lặp trò chơi
-setInterval(gameLoop, gameSpeed);
-
-// Chế độ bất tử
-let isImmortal = false;
-
-// Bật trạng thái bất tử
-function toggleImmortal() {
-    isImmortal = !isImmortal;
-    if (isImmortal) {
-        document.getElementById('immortal-status').innerText = 'Chế độ Bất Tử: Đã bật';
-    } else {
-        document.getElementById('immortal-status').innerText = '';
-    }
+.difficulty button:hover {
+    background-color: #007095;
 }
 
-function checkCollision() {
-    if (
-        snake[0].x < 0 ||
-        snake[0].x >= canvasEl.width ||
-        snake[0].y < 0 ||
-        snake[0].y >= canvasEl.height
-    ) {
-        if (!isImmortal) {
-            drawGameOverScreen();
-            return true;
-        } else {
-            if (snake[0].x < 0) {
-                snake[0].x = canvasEl.width - 20;
-            } else if (snake[0].x >= canvasEl.width) {
-                snake[0].x = 0;
-            } else if (snake[0].y < 0) {
-                snake[0].y = canvasEl.height - 20;
-            } else if (snake[0].y >= canvasEl.height) {
-                snake[0].y = 0;
-            }
-        }
-    }
-    for (let i = 1; i < snake.length; i++) {
-        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
-            if (!isImmortal) {
-                drawGameOverScreen();
-                return true;
-            }
-        }
-    }
-    return false;
+/* Thiết lập cho phần hiển thị trạng thái bất tử */
+#immortal-status {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #ff0000;
+}
+
+.buttons-move {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.buttons-move button {
+    width: 60px;
+    height: 60px;
+    font-size: 18px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
 }
